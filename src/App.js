@@ -1,8 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import firestore from "./database/firebase";
 
 function App() {
+  const [userLists, setUserLists] = useState([]);
+  const [currentCursor, setCurrentCursor] = useState(null);
+  useEffect(() => {
+    const firstPageRef = firestore
+      .collection("users")
+      .orderBy("userName", "asc")
+      .limit(3);
 
+    firstPageRef.get().then((querySnapshot) => {
+      let tempLists = [];
+      querySnapshot.docs.forEach((doc) => {
+        if (doc.exists) {
+          const currentUser = {
+            userName: doc.data().userName,
+            passWord: doc.data().passWord,
+            name: doc.data().name,
+            age: doc.data().age,
+          };
+
+          tempLists = [...tempLists, currentUser];
+        }
+      });
+      setUserLists((prv) => tempLists);
+      const currentLength = querySnapshot.docs.length;
+      const currentCursorFromFirstPage = querySnapshot.docs[currentLength - 1];
+      setCurrentCursor(currentCursorFromFirstPage);
+    });
+  }, []);
+
+  const onMoreUser = () => {
+    const nextPageRef = firestore
+      .collection("users")
+      .orderBy("userName", "asc")
+      .limit(3);
+
+    nextPageRef.get().then((querySnapshot) => {
+      const currentLength = querySnapshot.docs.length;
+      if (!currentLength) {
+        return;
+      }
+
+      const query = nextPageRef.startAfter(currentCursor);
+      query.get().then((querySnapshot) => {
+        let tempNewArray = [];
+        querySnapshot.docs.forEach((doc) => {
+          if (doc.exists) {
+            tempNewArray = [
+              ...tempNewArray,
+              {
+                userName: doc.data().userName,
+                passWord: doc.data().passWord,
+                name: doc.data().name,
+                age: doc.data().age,
+              },
+            ];
+          }
+        });
+        setUserLists([...userLists, ...tempNewArray]);
+        const currentCursorForNextPage = querySnapshot.docs[currentLength - 1];
+        setCurrentCursor(currentCursorForNextPage);
+      });
+    });
+  };
+
+  /////////////////
   const [userName, setUserName] = useState("");
   const [passWord, setPassWord] = useState("");
   const [name, setName] = useState("");
@@ -74,6 +138,25 @@ function App() {
           </div>
           <button type="submit"> Add</button>
         </form>
+      </div>
+
+      <div style={{ width: "80%", marginLeft: 20 }}>
+        <ul>
+          {userLists.map((user, index) => {
+            return (
+              <li key={index}>
+                #username: {user.userName}: name: {user.name}: age: {user.age}
+              </li>
+            );
+          })}
+        </ul>
+
+        <hr />
+        {currentCursor ? (
+          <button onClick={onMoreUser}>More User...</button>
+        ) : (
+          <div>No more user</div>
+        )}
       </div>
     </div>
   );
