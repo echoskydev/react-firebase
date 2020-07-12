@@ -2,6 +2,36 @@ import React, { useState, useEffect } from "react";
 import firestore from "./database/firebase";
 
 function App() {
+
+  ///////// realtime data
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    const ref = firestore.collection("users");
+    ref.onSnapshot(
+      (snapshot) => {
+        let tempDataArray = [];
+        snapshot.forEach((doc) => {
+          if (doc.exists) {
+            tempDataArray = [
+              ...tempDataArray,
+              {
+                userName: doc.data().userName,
+                passWord: doc.data().passWord,
+                name: doc.data().name,
+                age: doc.data().age,
+              },
+            ];
+          }
+        });
+        setData((oldDataArray) => tempDataArray);
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+  }, []);
+
+  //////////// load more
   const [userLists, setUserLists] = useState([]);
   const [currentCursor, setCurrentCursor] = useState(null);
   useEffect(() => {
@@ -66,7 +96,7 @@ function App() {
     });
   };
 
-  /////////////////
+  ///////////////// create data
   const [userName, setUserName] = useState("");
   const [passWord, setPassWord] = useState("");
   const [name, setName] = useState("");
@@ -103,6 +133,7 @@ function App() {
   return (
     <div className="App">
       <div style={{ width: "80%", marginLeft: 20 }}>
+      <div>Create Data</div>
         <form onSubmit={submitHandler}>
           <div>
             <label>Username</label>
@@ -141,6 +172,7 @@ function App() {
       </div>
 
       <div style={{ width: "80%", marginLeft: 20 }}>
+        <div>การแสดงข้อมูลแบบ load more</div>
         <ul>
           {userLists.map((user, index) => {
             return (
@@ -157,6 +189,30 @@ function App() {
         ) : (
           <div>No more user</div>
         )}
+      </div>
+
+      {/* realtime get data  */}
+      <div style={{ width: "80%", marginLeft: 20 }}>
+        <div>การใช้งานข้อมูลแบบเรียลทาม</div>
+        <table>
+          <tbody>
+            {data.map((item, index) => {
+              return (
+                <tr
+                  key={index}
+                  style={
+                    index % 2 === 0 ? { backgroundColor: "lightgray" } : null
+                  }
+                >
+                  <td>{item.userName}</td>
+                  <td>{item.passWord}</td>
+                  <td>{item.name}</td>
+                  <td>{item.age}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );
