@@ -8,8 +8,18 @@ function App() {
   return (
     <div className="container">
       <Header></Header>
-      <LoginForm></LoginForm>
-      <Storage></Storage>
+      <div className="row mt-4 bg-light p-5">
+        <div className="col-sm-12">
+          <h4>Firebase Login (Email & Password)</h4>
+        </div>
+        <LoginForm></LoginForm>
+      </div>
+      <div className="row mt-4 bg-light p-5 mb-5">
+        <div className="col-sm-12">
+          <h4>Firebase Storage</h4>
+        </div>
+        <Storage></Storage>
+      </div>
     </div>
   );
 }

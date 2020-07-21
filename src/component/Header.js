@@ -65,7 +65,7 @@ const Header = () => {
 
   return (
     <div className="row mt-4">
-      <div className="col-sm-10 mx-auto">
+      <div className="col-sm-12 mx-auto">
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
           <button
             className="navbar-toggler"
