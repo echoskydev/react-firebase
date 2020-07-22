@@ -14,6 +14,9 @@ export default function Storage() {
     if (!!file) {
       const fileName = file.name;
       const targetRef = subBucketRef.child(fileName);
+      //   const targetRef = subBucketRef.child(
+      //     `/user-profiles/${userId}/${photoURL}`
+      //   );
       const uploadTask = targetRef.put(file);
       setProgressStatus(true);
 
